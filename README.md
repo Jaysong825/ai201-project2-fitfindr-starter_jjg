@@ -113,6 +113,7 @@ Your README submission must document each tool's name, inputs, and return value.
 
 **One way planning.md helped during implementation:**
 Helped organize workflow and document ai implentaton/help
+
 **One divergence from your spec, and why:**
 I used regex instead of the LLM to parse queries — faster and no extra API call.
 ---
