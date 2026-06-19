@@ -70,33 +70,29 @@ Your README submission must document each tool's name, inputs, and return value.
 
 ## Interaction Walkthrough
 
-<!-- Walk through a complete interaction step by step: natural language query → each tool call (and why) → final fit card.
-     Walk through this carefully — it's how graders follow your agent's reasoning without a live demo.
-     Use a specific example — do not leave this as a template. -->
 
-**User query:**
 
-**Step 1 — Tool called:**
-- Tool:
-- Input:
-- Why this tool:
-- Output:
+**User query:**"I'm looking for a vintage graphic tee under $30. I mostly wear baggy jeans and chunky sneakers. What's out there and how would I style it?"
 
-**Step 2 — Tool called:**
-- Tool:
-- Input:
-- Why this tool:
-- Output:
+**Step 1 — Tool called:** `search_listings`**
+- Input: `description="vintage graphic tee"`, `size=None`, `max_price=30.0`
+- Why this tool:- Why this tool: Always the first step — parses the query for keywords, price, and size, then scores listings by keyword match.
+- Output: Two matching listings. Top result: `Y2K Baby Tee — Butterfly Print`, $18.00, depop, excellent condition
 
-**Step 3 — Tool called:**
-- Tool:
-- Input:
-- Why this tool:
-- Output:
+**Step 2 — Tool called: `suggest_outfit`**
+- Input: `new_item={"title": "Y2K Baby Tee — Butterfly Print", "price": 18.0, ...}`, `wardrobe=<example wardrobe with 10 items>`
+- Why this tool: `search_listings` returned results, so the agent selects the top match and passes it to `suggest_outfit` along with the session wardrobe.(only called if Step 1 passes)
+- Output: "Pair the Y2K Baby Tee with your Baggy straight-leg jeans, dark wash, and Chunky white sneakers... Or wear it with your Wide-leg khaki trousers and Black combat boots..."
+
+
+**Step 3 — Tool called: `create_fit_card`**
+- Input: `outfit=<suggestion from Step 2>`, `new_item=<top listing from Step 1>`
+- Why this tool: Both previous tools succeeded and returned non-empty output, so the agent generates the final shareable caption. This tool is only called if Step 2 produced a suggestion.
+- Output: "i just got this adorable y2k baby tee - butterfly print from depop for $18 and i'm obsessed with it. been pairing it with my baggy jeans and chunky sneakers 🙃"
 
 **Final output to user:**
 
----
+---All three Gradio panels populate — the listing details, the outfit suggestion, and the fit card caption ready to copy.
 
 ## Error Handling and Fail Points
 
@@ -105,9 +101,9 @@ Your README submission must document each tool's name, inputs, and return value.
 
 | Tool | Failure mode | Agent response |
 |------|-------------|----------------|
-| `search_listings` | | |
-| `suggest_outfit` | | |
-| `create_fit_card` | | |
+| `search_listings` | No listings match the query | Sets `session["error"]` and returns early — `suggest_outfit` is never called. |
+| `suggest_outfit` | Wardrobe is empty | Returns general styling advice based on the item's tags and colors instead of crashing. |
+| `create_fit_card` | `outfit` is empty or whitespace-only | Returns a descriptive error string — never raises an exception. |
 
 ---
 
@@ -116,9 +112,10 @@ Your README submission must document each tool's name, inputs, and return value.
 <!-- Answer both questions with at least 2–3 sentences each. -->
 
 **One way planning.md helped during implementation:**
+Helped organize workflow and document ai implentaton/help
 
 **One divergence from your spec, and why:**
-
+I used regex instead of the LLM to parse queries — faster and no extra API call.
 ---
 
 ## Where to Start
